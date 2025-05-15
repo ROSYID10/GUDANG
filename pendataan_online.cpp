@@ -20,28 +20,36 @@ typedef struct{
 }jualan;
 string nama,password,username,peran,verifikasiusername,verifikasipassword,verifikasiperan;
 char ulang,beli,isi,editlagi,yakin;
-int pilihan, edit, siapa, pilih, input, banyak_data = 0, p = 0;
-string namapengguna, alamatpengguna, no_hppengguna;
-jualan barang[100];
+int pilihan, selesai_beli, edit, siapa, pilih, input, pilihbeli, tambah, banyak_keranjang = 0   , banyak_data = 0, p = 0, index = 0;
+string namapengguna, alamatpengguna, no_hppengguna, sementara;
+jualan barang[100], isikeranjang[100];
 pembeli orang[100];
 
-void menu_beli(), login(), buatakun(), tampilkan_barang(),  input_barang(), edit_barang(), edit_toko(), hapus_barang(), cari_barang(),cari_barang(), ubahkapital(string& str), tampilkan_data_diri (), sorting_data();
+
+void menu_beli(), login(), buatakun(), tampilkan_barang(jualan* data, int index),  input_barang(), edit_barang(), edit_toko(), hapus_barang(), cari_barang(), ubahkapital(string& str), tampilkan_data_diri(pembeli* data), sorting_data(), taruhfiledatadiri(), taruhinputbarang(), simpanfiledatadiri(), simpaninputbarang(), simpanbanyakbarang(), ubahinputbarang(),beli_barang(int beli), beli_langsung(), tambahkan_keranjang(), tampilkanisikeranjang();
 
 // ===========================================================================================================================================================================================================================================
 // Bagian Keseluruhan deklarasi
 
 int main(){
-    system("cls");
-    cout    <<"1. Buat Akun"<<endl;
-    cout    <<"2. Login"<<endl;
-
-    cout    <<"Masukan pilihan anda : ";
-    cin     >>   pilih;
-    switch  (pilih)
-    {  
-        case 1:buatakun();break;
-        case 2:login();break;
-    }
+    do{
+        system("cls");
+        
+        taruhfiledatadiri();
+        taruhinputbarang();
+        
+        cout    <<"1. Buat Akun"<<endl;
+        cout    <<"2. Login"<<endl;
+        
+        cout    <<"Masukan pilihan anda : ";
+        cin     >>   pilih;
+        switch  (pilih){  
+            case 1: buatakun();break;
+            case 2: login();break;
+            case 3: cout<<"Terima Kasih"<<endl; system("exit");
+            default:cout<<"inputan anda tidak tersedia"<<endl;
+        }
+    }while(pilih == 1 || pilih == 2 || pilih == 3);
 }
 
 //menu yang tersedia di main
@@ -55,23 +63,24 @@ void edit_toko(){
     cout<<"4. Tampilkan Barang Jualan"<<endl;
     cout<<"5. Cari Barang Jualan"<<endl;
     cout<<"6. Sorting Data Berdasarkan Harga"<<endl;
-    cout<<"7. Kembali"<<endl;
+    cout<<"7. Keluar"<<endl;
     cout<<"================================="<<endl;
-    cout<<"Masukan Pilihan Anda (1-6) : ";
+    cout<<"Masukan Pilihan Anda (1-7) : ";
     cin>>edit;
     
         switch(edit){
             case 1:system("cls");input_barang();break;
             case 2:system("cls");edit_barang();break;
             case 3:system("cls");hapus_barang();break;
-            case 4:system("cls");tampilkan_barang();break;
+            case 4:system("cls");tampilkan_barang(barang, index);break;
             case 5:system("cls");cari_barang();break;
             case 6:system("cls");sorting_data();break;
             case 7:system("cls");break;   
             default:cout<<"Pilihan Tidak Tersedia"<<endl;
         }
-        cout<<"Apakah Anda Masih Ingin Di Dalam Menu Edit Barang Penjualan? (y/t) : ";
-        cin>>editlagi;
+        if(edit == 7){break;}
+    cout<<"Apakah Anda Masih Ingin Di Dalam Menu Edit Barang Penjualan? (y/t) : ";
+    cin>>editlagi;
     }while(editlagi == 'y' || editlagi == 'Y');
 }
 // ==========================================================================================================================================================
@@ -82,21 +91,26 @@ void input_barang(){
     system("cls");
     cout<<"Masukkan Jumlah Barang yang ingin diinput : ";
     cin>>input;
+    
 
     for(int i = 0; i < input; i++){
+        cin.ignore();
         system("cls");
         cout<<"Masukkan Nama Barang : ";
-        cin.ignore();
-        cin>>barang[banyak_data].nama;
+        getline(cin,barang[banyak_data].nama);
         ubahkapital(barang[banyak_data].nama);
         cout<<"Masukkan Harga Barang : ";
         cin>>barang[banyak_data].harga;
         cout<<"Masukkan Stok Barang : ";
         cin>>barang[banyak_data].stok;
+        cin.ignore();
         cout<<"Masukkan Deskripsi Barang :";
-        cin>>barang[banyak_data].deskripsi;
+        getline(cin, barang[banyak_data].deskripsi);
+        simpaninputbarang();
         banyak_data++;
+        
     }
+    simpanbanyakbarang();
     cout<<"Data Barang Sudah Tersimpan"<<endl;
 }
 void edit_barang(){
@@ -109,6 +123,7 @@ void edit_barang(){
         cout<<"1. Nama"<<endl;
         cout<<"2. Harga"<<endl;
         cout<<"3. Stok"<<endl;
+        cout<<"4. Deskripsi"<<endl;
         cout<<endl;
         cout<<"Hal Apa Yang Ingin Di Edit : ";
         int edit;
@@ -129,11 +144,12 @@ void edit_barang(){
             break;
             case 4:
             cout<<"Masukan Deskripsi Barang : ";
-            cin>>barang[i].deskripsi;
+            getline(cin, barang[i].deskripsi);
             break;
         }
         cout<<endl;
-        tampilkan_barang();
+        ubahinputbarang();
+        tampilkan_barang(barang, index);
         cout<<endl;
         cout<<"Barang Berhasil Di Edit"<<endl;
         cout<<endl;
@@ -150,7 +166,10 @@ void cari_barang(){
     ubahkapital(nama);
     for(int i = 0; i<banyak_data; i++){
         if(nama==barang[i].nama){
-            tampilkan_barang();
+        cout<<"Nama Barang  : "<<barang[i].nama<<endl;
+        cout<<"Harga Barang : "<<barang[i].harga<<endl;
+        cout<<"Stok Barang  : "<<barang[i].stok<<endl;
+        cout<<"Deskripsi Barang : "<<barang[i].deskripsi<<endl;
         }
     }
 }
@@ -160,14 +179,15 @@ void hapus_barang(){
     ubahkapital(nama);
     for(int i=0; i<=banyak_data ; i++){
         if(nama == barang[i].nama){
-            for(int j = i; j<=banyak_data ; j++){
-                orang[j] = orang[j+1];
-                if(j==banyak_data){
-                    banyak_data--;
-                    cout<<"Data Berhasil diHapus"<<endl;
-                    break;
-                }
+            for(int j = i; j < banyak_data ; j++){
+                barang[j] = barang[j+1];
             }
+            banyak_data--;
+            ubahinputbarang();
+            simpanbanyakbarang();
+            
+            cout<<"Data Berhasil diHapus"<<endl;
+
             break;
         }if(i==banyak_data && nama != orang[i].nama){
             cout<<"Data Tidak Ditemukan"<<endl;
@@ -178,28 +198,25 @@ void hapus_barang(){
 
 // MENU YANG TERSEDIA BAGI PEMBELI
 // ==========================================================================================================================================================
-void menu_beli(){
-    
-}
-void tampilkan_data_diri(){
+
+
+void tampilkan_data_diri(pembeli* data){
     system("cls");
-    cout<<"Nama : "<<orang[p].nama<<endl;
-    cout<<"Alamat : "<<orang[p].alamat<<endl;
-    cout<<"Nomor Telepon :"<<orang[p].nomor_telp<<endl;
+    cout<<"Nama : "<<data[p].nama<<endl;
+    cout<<"Alamat : "<<data[p].alamat<<endl;
+    cout<<"Nomor Telepon :"<<data[p].nomor_telp<<endl;
 }
 
-void tampilkan_barang(){
-    for(int i = 0; i<=banyak_data; i++){
-        if(banyak_data == 0){
-            cout<<"Belum Ada Data Yang Di Input"<<endl;
-            break;
-        }else{
-        cout<<"Nama Barang  : "<<barang[i].nama<<endl;
-        cout<<"Harga Barang : "<<barang[i].harga<<endl;
-        cout<<"Stok Barang  : "<<barang[i].stok<<endl;
-        cout<<"Deskripsi Barang : "<<barang[i].deskripsi<<endl;
-        cout<<endl;
-        }
+void tampilkan_barang(jualan* data, int index){
+    if(banyak_data == 0)cout<<"Belum Ada Barang Yang Diinputkan"<<endl;
+    if(index == banyak_data)return;
+    if(index < banyak_data){
+        cout    <<"Nama Barang  : "<<data[index].nama<<endl;
+        cout    <<"Harga Barang : "<<data[index].harga<<endl;
+        cout    <<"Stok Barang  : "<<data[index].stok<<endl;
+        cout    <<"Deskripsi Barang : "<<data[index].deskripsi<<endl;
+        cout    <<endl;
+        tampilkan_barang(data, index + 1);
     }
 }
 
@@ -215,7 +232,7 @@ void sorting_data(){
         cout << "Belum ada data yang bisa diurutkan.\n";
         return;
     }
-
+    
     // Bubble sort berdasarkan harga
     for(int i = 0; i < banyak_data - 1; i++){
         for(int j = 0; j < banyak_data - i - 1; j++){
@@ -224,9 +241,9 @@ void sorting_data(){
             }
         }
     }
-
+    
     cout << "\nData barang berhasil diurutkan berdasarkan harga secara ascending:\n";
-    tampilkan_barang();
+    tampilkan_barang(barang, index);
 }
 //===========================================================================================================================================================
 
@@ -242,50 +259,44 @@ void buatakun(){
     cin>>siapa;
     if(siapa == 1 )peran = "pembeli";
     else if(siapa == 2)peran = "penjual";
-
-    cout<<"Masukan Username Anda : ";
-    cin>>username;
-    cout<<"Masukan Password Anda : ";
-    cin>>password;
+    
+    cout    <<"Masukan Username Anda : ";
+    cin     >>username;
+    cout    <<"Masukan Password Anda : ";
+    cin     >>password;
+    
     ofstream akun;
     akun.open("akun1", ios::app);
-    akun << username;
-    akun << endl;
-    akun << password;
-    akun << endl;
-    akun << peran;
-    akun << endl;
+    akun    << username;
+    akun    << endl;
+    akun    << password;
+    akun    << endl;
+    akun    << peran;
+    akun    << endl;
     akun.close();
+    
     if(siapa == 1){
-    ofstream Myfile;
-    Myfile.open(("datadiri" + username), ios::app);
         do{
-        cout    <<"Silahkan Isi Identitas Diri Anda"<<endl;
-        cout    <<"Nama Anda : ";
-        cin.ignore();
-        getline(cin, orang[p].nama);
+            cout    <<"Silahkan Isi Identitas Diri Anda"<<endl;
+            cout    <<"Nama Anda : ";
+            cin.ignore();
+            getline(cin, orang[p].nama);
+            akun    << orang[p].nama;
+            
+            cout    <<"Masukan Alamat Anda : ";
+            getline(cin, orang[p].alamat);
+            akun    << orang[p].alamat;
+            
+            cout    <<"Masukan Nomor Telepon Anda : ";
+            cin     >>orang[p].nomor_telp;          
+            tampilkan_data_diri(orang);
 
-        akun    << orang[p].nama;
-        cout    <<"Masukan Alamat Anda : ";
-        getline(cin, orang[p].alamat);
-
-        akun    << orang[p].nama;
-        cout    <<"Masukan Nomor Telepon Anda : ";
-        cin     >>orang[p].nomor_telp;          
-        tampilkan_data_diri();
-        cout    <<"Apakah data diri anda sudah benar? (y/t) : ";
-        cin     >>yakin;
+            cout    <<"Apakah data diri anda sudah benar? (y/t) : ";
+            cin     >>yakin;
         }while(yakin == 't' || yakin == 'T');
-    Myfile << orang[p].nama;
-    Myfile << endl; 
-    Myfile << orang[p].alamat;
-    Myfile << endl;
-    Myfile << orang[p].nomor_telp;
-    Myfile.close();
+        
+        simpanfiledatadiri();
     }
-    
-    
-
     cout<<"Selamat Anda Berhasil Membuat Akun"<<endl;
     cout<<"Silahkan Lanjut ke Menu login"<<endl;
     system("pause");
@@ -294,27 +305,251 @@ void buatakun(){
 void login(){
     system("cls");
     bool berhasil = false;
-    do{
-    cout<<"Masukan Username Anda : ";
-    cin>>username;
-    cout<<"Masukan Password Anda : ";
-    cin>>password;
-    ifstream akun;
-    akun.open("akun1");
-    while(!akun.eof()){
-        akun >> verifikasiusername;
-        akun >> verifikasipassword;
-        akun >> verifikasiperan;
-        if((verifikasiusername == username) && (verifikasipassword == password)){
-            cout<<"anda berhasil login"<<endl;
-            berhasil = true;
-            system("pause");
-            break;
+    int kesempatan = 3;
+    for(int i = 3; i >= kesempatan ;i--){
+        system("cls");
+        cout<<"Masukan Username Anda : ";
+        cin>>username;
+        cout<<"Masukan Password Anda : ";
+        cin>>password;
+        ifstream akun;
+        akun.open("akun1");
+        while(!akun.eof()){
+            akun >> verifikasiusername;
+            akun >> verifikasipassword;
+            akun >> verifikasiperan;
+            if((verifikasiusername == username) && (verifikasipassword == password)){
+                cout<<endl<<"anda berhasil login"<<endl<<endl;
+                berhasil = true;
+                system("pause");
+                break;
+            }
         }
-    }
+
+        if((kesempatan == 0) && (!berhasil)){
+            cout<<"Kesempatan Login anda Habis, Silahkan Coba Kembali Lain Kali"<<endl;
+            exit(0);
+        }else if(!berhasil){
+            cout<<"Username atau Password anda salah"<<endl;
+            cout<<"Anda Masih memiliki "<< kesempatan <<" kesempatan lagi"<<endl;
+            cout<<"Silahkan mengisi kembali"<<endl;
+            cout<<endl;
+            kesempatan--;
+            system("pause");
+        }
+        akun.close();
+        
+    }while(!berhasil);
     if(verifikasiperan == "pembeli")menu_beli();
     else if(verifikasiperan == "penjual")edit_toko(); 
-    akun.close();
-    }while(!berhasil);
 }
 // ==========================================================================================================================================================
+
+void taruhfiledatadiri(){
+    ifstream datadiri;
+    ifstream Myfile;
+    Myfile.open("datadiri");
+    datadiri.open("BanyakDataDiri");
+    datadiri >> p;
+    for(int i = 0; i <= p; i++){
+    Myfile  >> orang[p].nama;
+    Myfile  >> orang[p].alamat;
+    Myfile  >> orang[p].nomor_telp;
+}
+Myfile.close();
+datadiri.close();
+}
+
+void simpanfiledatadiri(){
+    ofstream Myfile;
+    ofstream datadiri;
+    datadiri.open("BanyakDataDiri", ios::trunc);
+    Myfile.open(("datadiri" + username), ios::app);
+    Myfile << orang[p].nama;
+    Myfile << endl; 
+    Myfile << orang[p].alamat;
+    Myfile << endl;
+    Myfile << orang[p].nomor_telp;
+    p++;
+    datadiri << p;
+    datadiri.close();
+    Myfile.close();
+}
+
+void taruhinputbarang(){
+    ifstream data;
+    ifstream banyak;
+    data.open("databarang");
+    banyak.open("banyakbarang");
+    banyak >> banyak_data;
+    for(int i = 0 ; i < banyak_data ; i++){
+        if(banyak_data == 0 )break;
+        getline(data >> ws, barang[i].nama);
+        data >> barang[i].harga;
+        data >> barang[i].stok;
+        getline(data >> ws, barang[i].deskripsi);
+    }
+    data.close();
+    banyak.close();
+}
+
+void simpaninputbarang(){
+    ofstream data;
+    
+    data.open("databarang", ios::app);
+    data << barang[banyak_data].nama;
+    data << endl;
+    data << barang[banyak_data].harga;
+    data << endl;
+    data << barang[banyak_data].stok;
+    data << endl;
+    data << barang[banyak_data].deskripsi;
+    data << endl;
+    data.close();
+    
+}
+
+void simpanbanyakbarang(){
+    ofstream banyak;
+    banyak.open("banyakbarang", ios::trunc);
+    banyak << banyak_data;
+    banyak.close();
+}
+
+void ubahinputbarang(){
+    ofstream risetdata;
+    
+    risetdata.open("databarang", ios::trunc);
+    risetdata.close();
+    
+    ofstream data;
+    data.open("databarang", ios::app);
+    for(int i = 0 ; i < banyak_data; i++){
+        data << barang[i].nama;
+    data << endl;
+    data << barang[i].harga;
+    data << endl;
+    data << barang[i].stok;
+    data << endl;
+    data << barang[i].deskripsi;
+    data << endl;
+}
+data.close();
+
+}
+
+
+
+
+
+void menu_beli(){
+    cout<<endl;
+    cout<<"==========PILIHAN MENU=========="<<endl;
+    cout<<"1. Beli "<<endl;
+    cout<<"2. Lihat Isi Keranjang"<<endl;
+    cout<<"3. Mengurutkan barang"<<endl;
+    cout<<"4. Keluar"<<endl;
+    cout<<"================================"<<endl;
+    cout<<"Masukan Pilihan Anda : ";
+    cin>>pilihbeli;
+
+    switch(pilihbeli){
+        case 1:beli_langsung();
+        break;
+
+        case 2:tampilkanisikeranjang();
+        break;
+
+        case 3:
+        break;
+
+        case 4:
+        break;
+
+        default:
+        break;
+    }
+    
+}
+
+void beli_langsung(){
+    do{
+        system("cls");
+        tampilkan_barang(barang, index);
+        cout<<endl;
+        cout<<"Barang Nomor Berapa Yang Ingin Anda Beli : ";
+        cin>>selesai_beli;
+        selesai_beli--;
+        if(selesai_beli <= banyak_data){
+            cout<<"Barang yang anda pilih tidak ada di etalase"<<endl;
+            cout<<"Silahkan pilih kembali"<<endl;
+        }
+    }while(selesai_beli >= banyak_data);
+    
+    do{
+    int membeli;
+    cout<<"1. Beli langsung"<<endl;
+    cout<<"2. Masukan Ke keranjang"<<endl;
+    cout<<"============================"<<endl;
+    cout<<"Masukkan pilihan Anda : ";
+    cin>>membeli;
+    switch(membeli){
+        case 1: beli_barang(selesai_beli);
+        break;
+
+        case 2: tambahkan_keranjang();
+        break;
+
+        default:
+        break;
+    }
+    system("pause");
+    }while(beli == 1 || beli == 2);
+}
+
+void beli_barang(int beli){
+
+    
+
+}
+
+void tambahkan_keranjang(){
+    ofstream keranjang;
+    keranjang.open("keranjang" + username, ios::app);
+
+    keranjang << barang[selesai_beli].nama;
+    keranjang << endl;
+    keranjang << barang[selesai_beli].harga;
+    keranjang << endl;
+    keranjang << barang[selesai_beli].deskripsi;
+    keranjang << endl;
+
+    if(!keranjang){
+        cout<<"Terjadi Kesalahan barang anda gagal di tambahkan"<<endl;
+    }
+    if(keranjang){
+        cout<<"Barang Anda berhasil di tambahkan"<<endl;
+    }
+
+
+    keranjang.close();
+}
+
+void tampilkanisikeranjang(){
+    ifstream isikeranjang;
+    isikeranjang.open("Keranjang" + username);
+    while(!isikeranjang.eof()){
+    isikeranjang >> sementara;
+    isikeranjang >> sementara;
+    isikeranjang >> sementara;
+    }
+}
+
+
+    
+
+
+
+
+
+
