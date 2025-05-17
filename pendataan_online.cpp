@@ -26,7 +26,7 @@ jualan barang[100], isikeranjang[100];
 pembeli orang[100];
 
 
-void menu_beli(), login(), buatakun(), tampilkan_barang(jualan* data, int index),  input_barang(), edit_barang(), edit_toko(), hapus_barang(), cari_barang(), ubahkapital(string& str), tampilkan_data_diri(pembeli* data), sorting_data(), taruhfiledatadiri(), taruhinputbarang(), simpanfiledatadiri(), simpaninputbarang(), simpanbanyakbarang(), ubahinputbarang(),beli_barang(int beli), beli_langsung(), tambahkan_keranjang(), tampilkanisikeranjang();
+void menu_beli(), login(), buatakun(), tampilkan_barang(jualan* data, int index),  input_barang(), edit_barang(), edit_toko(), hapus_barang(), cari_barang(), ubahkapital(string& str), tampilkan_data_diri(pembeli* data), sorting_data(jualan* barang), taruhfiledatadiri(), taruhinputbarang(), simpanfiledatadiri(), simpaninputbarang(), simpanbanyakbarang(), ubahinputbarang(),beli_barang(int beli), beli_langsung(), tambahkan_keranjang(), tampilkanisikeranjang();
 
 // ===========================================================================================================================================================================================================================================
 // Bagian Keseluruhan deklarasi
@@ -34,13 +34,10 @@ void menu_beli(), login(), buatakun(), tampilkan_barang(jualan* data, int index)
 int main(){
     do{
         system("cls");
-        
         taruhfiledatadiri();
         taruhinputbarang();
-        
         cout    <<"1. Buat Akun"<<endl;
         cout    <<"2. Login"<<endl;
-        
         cout    <<"Masukan pilihan anda : ";
         cin     >>   pilih;
         switch  (pilih){  
@@ -62,7 +59,7 @@ void edit_toko(){
     cout<<"3. Hapus Barang Jualan"<<endl;
     cout<<"4. Tampilkan Barang Jualan"<<endl;
     cout<<"5. Cari Barang Jualan"<<endl;
-    cout<<"6. Sorting Data Berdasarkan Harga"<<endl;
+    cout<<"6. Sorting Barang"<<endl;
     cout<<"7. Keluar"<<endl;
     cout<<"================================="<<endl;
     cout<<"Masukan Pilihan Anda (1-7) : ";
@@ -74,7 +71,7 @@ void edit_toko(){
             case 3:system("cls");hapus_barang();break;
             case 4:system("cls");tampilkan_barang(barang, index);break;
             case 5:system("cls");cari_barang();break;
-            case 6:system("cls");sorting_data();break;
+            case 6:system("cls");sorting_data(barang);break;
             case 7:system("cls");break;   
             default:cout<<"Pilihan Tidak Tersedia"<<endl;
         }
@@ -211,10 +208,12 @@ void tampilkan_barang(jualan* data, int index){
     if(banyak_data == 0)cout<<"Belum Ada Barang Yang Diinputkan"<<endl;
     if(index == banyak_data)return;
     if(index < banyak_data){
+        cout    <<"=================="<<index + 1<<"==================="<<endl;
         cout    <<"Nama Barang  : "<<data[index].nama<<endl;
         cout    <<"Harga Barang : "<<data[index].harga<<endl;
         cout    <<"Stok Barang  : "<<data[index].stok<<endl;
         cout    <<"Deskripsi Barang : "<<data[index].deskripsi<<endl;
+        cout    <<"======================================="<<endl;
         cout    <<endl;
         tampilkan_barang(data, index + 1);
     }
@@ -227,22 +226,49 @@ void ubahkapital(string& str) {
         c = toupper(c);
     }
 }
-void sorting_data(){
+void sorting_data(jualan* barang){
     if (banyak_data == 0) {
         cout << "Belum ada data yang bisa diurutkan.\n";
         return;
     }
-    
-    // Bubble sort berdasarkan harga
+
+    int pilih;
+    cout<<"1. Nama "<<endl;
+    cout<<"2. Harga "<<endl;
+    cout<<"3. Stok "<<endl;
+    cout<<"======================="<<endl;
+    cout<<"Anda Ingin Mengurutkan Berdasarkan Apa : ";
+    cin >> pilih;
     for(int i = 0; i < banyak_data - 1; i++){
-        for(int j = 0; j < banyak_data - i - 1; j++){
-            if(barang[j].harga > barang[j + 1].harga){
-                swap(barang[j], barang[j + 1]);
+        for(int j = 0; j < banyak_data - 1; j++){
+            bool ganti = false;
+
+            switch(pilih){
+                case 1:if(barang[j].nama  > barang[j+1].nama)ganti = true;
+                break;
+                
+                case 2:if(barang[j].harga > barang[j+1].harga)ganti = true;
+                break;
+                
+                case 3:if(barang[j].stok  > barang[j+1].stok)ganti = true;
+                break;
+                
+                default:
+                break;
             }
+            if(ganti == true){
+                swap(barang[j], barang[j+1]);
+            }
+    
+    
+    // // Bubble sort berdasarkan harga
+    
+            
         }
     }
+
     
-    cout << "\nData barang berhasil diurutkan berdasarkan harga secara ascending:\n";
+    cout << "\nData barang berhasil diurutkan ascending:\n";
     tampilkan_barang(barang, index);
 }
 //===========================================================================================================================================================
@@ -443,33 +469,40 @@ data.close();
 
 
 void menu_beli(){
-    cout<<endl;
-    cout<<"==========PILIHAN MENU=========="<<endl;
-    cout<<"1. Beli "<<endl;
-    cout<<"2. Lihat Isi Keranjang"<<endl;
-    cout<<"3. Mengurutkan barang"<<endl;
-    cout<<"4. Keluar"<<endl;
-    cout<<"================================"<<endl;
-    cout<<"Masukan Pilihan Anda : ";
-    cin>>pilihbeli;
-
-    switch(pilihbeli){
-        case 1:beli_langsung();
-        break;
-
-        case 2:tampilkanisikeranjang();
-        break;
-
-        case 3:
-        break;
-
-        case 4:
-        break;
-
-        default:
-        break;
-    }
-    
+    char belilagi;
+    do{
+        cout<<endl;
+        cout<<"==========PILIHAN MENU=========="<<endl;
+        cout<<"1. Beli "<<endl;
+        cout<<"2. Lihat Isi Keranjang"<<endl;
+        cout<<"3. Mengurutkan barang"<<endl;
+        cout<<"4. Keluar"<<endl;
+        cout<<"================================"<<endl;
+        cout<<"Masukan Pilihan Anda : ";
+        cin>>pilihbeli;
+        
+        switch(pilihbeli){
+            case 1:beli_langsung();
+            break;
+            
+            case 2:tampilkanisikeranjang();
+            break;
+            
+            case 3:sorting_data(barang);
+            break;
+            
+            case 4:cout<<"Terima Kasih Anda Sudah Berbelanja"<<endl;
+                    system("pause");
+            break;
+            
+            default:
+            break;
+        }
+        if(pilihbeli == 4)break;
+        cout<<"Apakah anda ingin kembali berbelanja? : ";
+        cin>>belilagi;
+        
+    }while(belilagi == 'y' || belilagi == 'Y');   
 }
 
 void beli_langsung(){
@@ -530,7 +563,6 @@ void tambahkan_keranjang(){
     if(keranjang){
         cout<<"Barang Anda berhasil di tambahkan"<<endl;
     }
-
 
     keranjang.close();
 }
