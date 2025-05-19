@@ -18,6 +18,12 @@ typedef struct{
     int stok;
     string deskripsi;
 }jualan;
+typedef struct{
+    string nama;
+    int harga;
+    int banyak_barang;
+    int jumlah;
+}struk;
 string nama,password,username,peran,verifikasiusername,verifikasipassword,verifikasiperan;
 char ulang,beli,isi,editlagi,yakin;
 int pilihan, selesai_beli, edit, siapa, pilih, input, pilihbeli, tambah, banyak_keranjang = 0   , banyak_data = 0, p = 0, index = 0;
@@ -27,12 +33,14 @@ pembeli orang[100];
 
 
 void menu_beli(), login(), buatakun(), tampilkan_barang(jualan* data, int index),  input_barang(), edit_barang(), edit_toko(), hapus_barang(), cari_barang(), ubahkapital(string& str), tampilkan_data_diri(pembeli* data), sorting_data(jualan* barang), taruhfiledatadiri(), taruhinputbarang(), simpanfiledatadiri(), simpaninputbarang(), simpanbanyakbarang(), ubahinputbarang(),beli_barang(int beli), beli_langsung(), tambahkan_keranjang(), tampilkanisikeranjang();
-
+void Masukan_nota(int beli, int jumlah), riwayat_beli();
 // ===========================================================================================================================================================================================================================================
 // Bagian Keseluruhan deklarasi
 
 int main(){
+    
     do{
+        struk pembelian[100];
         system("cls");
         taruhfiledatadiri();
         taruhinputbarang();
@@ -471,12 +479,14 @@ data.close();
 void menu_beli(){
     char belilagi;
     do{
+        system("cls");
         cout<<endl;
         cout<<"==========PILIHAN MENU=========="<<endl;
         cout<<"1. Beli "<<endl;
         cout<<"2. Lihat Isi Keranjang"<<endl;
         cout<<"3. Mengurutkan barang"<<endl;
-        cout<<"4. Keluar"<<endl;
+        cout<<"4. Riwayat Pembelian"<<endl;
+        cout<<"5. Keluar"<<endl;
         cout<<"================================"<<endl;
         cout<<"Masukan Pilihan Anda : ";
         cin>>pilihbeli;
@@ -490,15 +500,18 @@ void menu_beli(){
             
             case 3:sorting_data(barang);
             break;
+
+            case 4:riwayat_beli();
+            break;
             
-            case 4:cout<<"Terima Kasih Anda Sudah Berbelanja"<<endl;
-                    system("pause");
+            case 5:cout<<"Terima Kasih Anda Sudah Berbelanja"<<endl;
+                   system("pause");
             break;
             
             default:
             break;
         }
-        if(pilihbeli == 4)break;
+        if(pilihbeli == 5)break;
         cout<<"Apakah anda ingin kembali berbelanja? : ";
         cin>>belilagi;
         
@@ -513,7 +526,7 @@ void beli_langsung(){
         cout<<"Barang Nomor Berapa Yang Ingin Anda Beli : ";
         cin>>selesai_beli;
         selesai_beli--;
-        if(selesai_beli <= banyak_data){
+        if(selesai_beli < banyak_data){
             cout<<"Barang yang anda pilih tidak ada di etalase"<<endl;
             cout<<"Silahkan pilih kembali"<<endl;
         }
@@ -521,6 +534,7 @@ void beli_langsung(){
     
     do{
     int membeli;
+    system("cls");
     cout<<"1. Beli langsung"<<endl;
     cout<<"2. Masukan Ke keranjang"<<endl;
     cout<<"============================"<<endl;
@@ -541,8 +555,51 @@ void beli_langsung(){
 }
 
 void beli_barang(int beli){
+    int jumlah;
+    char konfirmasi;
+    do{
+        system("cls");
+        cout<<"-----------------Barang-----------------"<<endl;
+        cout<<"Nama Barang \t: "<<barang[beli].nama<<endl;
+        cout<<"Harga Barang \t: "<<"Rp."<<barang[beli].harga<<endl;
+        cout<<"Stok Barang \t: "<<barang[beli].stok<<endl;
+        cout<<"-----------------------------------------"<<endl;
+        cout<<"Berapa Jumlah yang ingin anda Beli : ";
+        cin>>jumlah;
+    if(jumlah > barang[beli].stok){
+        cout<<"Jumlah tidak valid untuk stok barang yang di beli"<<endl;
+        system("pause");
+    }
+    }while(jumlah > barang[beli].stok);
 
-    
+    int total = jumlah * barang[beli].harga;
+    bool benar=false;
+    while(!benar){
+        cout<<"==============checkout=============="<<endl;
+        cout<<"Nama \t: "<<barang[beli].nama<<endl;
+        cout<<"Harga\t: "<<"Rp."<<barang[beli].harga<<endl;
+        cout<<"Jumlah\t: "<<jumlah<<endl;
+        cout<<"total \t: "<<"Rp."<<total<<endl;
+        cout<<"===================================="<<endl;
+        cout<<"Konfirmasi Pembelian? (y/n) : ";
+        cin>>konfirmasi;
+        if(konfirmasi == 'y'|| konfirmasi == 'Y'){
+            barang[beli].stok -+ jumlah;
+            ubahinputbarang();
+            cout<<"Terima Kasih Sudah Berbelanja :)"<<endl;
+            Masukan_nota(beli, jumlah);
+            benar = true;
+        }
+        else if(konfirmasi == 'n' || konfirmasi == 'N'){
+            cout<<"Pembelian Dibatalkan"<<endl;
+            break;
+        }else{
+            cout<<"Inputan tidak valid"<<endl;
+            cout<<"Silahkan Menginputkan Kembali"<<endl;
+            system("pause");
+        }
+    }
+        
 
 }
 
@@ -567,13 +624,66 @@ void tambahkan_keranjang(){
     keranjang.close();
 }
 
+void Masukan_nota(int beli, int jumlah){
+    ofstream nota;
+    nota.open("nota"+username+".txt", ios::app);
+    nota << barang[beli].nama;
+    nota << endl;
+    nota << barang[beli].harga;
+    nota << endl;
+    nota << jumlah;
+    nota << endl;
+    nota << (barang[beli].harga*jumlah);
+    nota << endl;
+}
+
+void riwayat_beli(){
+
+    ifstream nota;
+    nota.open("nota"+username+".txt");
+    if(!nota){
+        cout<<"Anda belum melakukan transaksi "<<endl;
+        cout<<"Silahkan Lakukan Transaksi terlebih dahulu"<<endl;
+        system("pause");
+    }else{
+        while(!nota.eof()){
+            int kosong;
+            struk beli;
+            nota >> beli.nama;
+            nota >> beli.harga;
+            nota >> beli.banyak_barang;
+            nota >> beli.jumlah;
+            
+            if(nota.eof()){
+                break;
+            }
+            system("cls");
+            cout<<"==================================="<<endl;
+            cout<<"Barang \t: "<<beli.nama<<endl;
+            cout<<"Harga \t: "<<"Rp."<<beli.harga<<endl;
+            cout<<"Jumlah\t: "<<beli.banyak_barang<<endl;
+            cout<<"Total \t: "<<"Rp."<<beli.jumlah<<endl;
+            cout<<"==================================="<<endl;
+            cout<<endl;
+        }
+        nota.close();
+    }
+}
+
 void tampilkanisikeranjang(){
+    system("cls");
     ifstream isikeranjang;
     isikeranjang.open("Keranjang" + username);
-    while(!isikeranjang.eof()){
-    isikeranjang >> sementara;
-    isikeranjang >> sementara;
-    isikeranjang >> sementara;
+    if(!isikeranjang){
+        cout<<"Anda belum manambahkan barang apapun"<<endl;
+        cout<<"Silahkan tambahkan terlebih dahulu"<<endl;
+        system("pause");
+    }else{
+        while(!isikeranjang.eof()){
+            isikeranjang >> sementara;
+            isikeranjang >> sementara;
+            isikeranjang >> sementara;
+        }
     }
 }
 
