@@ -7,6 +7,7 @@ using namespace std;
 
 // Bagian Keseluruhan deklarasi
 // ==========================================================================================================================================================================================================================================
+
 typedef struct{
     string nama;
     string alamat;
@@ -24,9 +25,10 @@ typedef struct{
     int banyak_barang;
     int jumlah;
 }struk;
-string nama,password,username,peran,verifikasiusername,verifikasipassword,verifikasiperan;
-char ulang,beli,isi,editlagi,yakin;
-int pilihan, selesai_beli, edit, siapa, pilih, input, pilihbeli, tambah, banyak_keranjang = 0   , banyak_data = 0, p = 0, index = 0;
+
+string password,username,peran;
+char ulang,beli,isi,yakin;
+int pilihan, selesai_beli, siapa, tambah, banyak_keranjang = 0   , banyak_data = 0, p = 0, index = 0;
 string namapengguna, alamatpengguna, no_hppengguna, sementara;
 jualan barang[100], isikeranjang[100];
 pembeli orang[100];
@@ -38,7 +40,7 @@ void Masukan_nota(int beli, int jumlah), riwayat_beli();
 // Bagian Keseluruhan deklarasi
 
 int main(){
-    
+    int pilih;
     do{
         struk pembelian[100];
         system("cls");
@@ -59,6 +61,8 @@ int main(){
 
 //menu yang tersedia di main
 void edit_toko(){
+    int edit;
+    char editlagi;
     do{
     system("cls");
     cout<<"===== EDIT BARANG PENJUALAN ====="<<endl;
@@ -93,6 +97,7 @@ void edit_toko(){
 //MENU YANG TERSEDIA BAGI PENJUAL
 // ==========================================================================================================================================================
 void input_barang(){
+    int input;
     system("cls");
     cout<<"Masukkan Jumlah Barang yang ingin diinput : ";
     cin>>input;
@@ -119,6 +124,7 @@ void input_barang(){
     cout<<"Data Barang Sudah Tersimpan"<<endl;
 }
 void edit_barang(){
+    string nama;
     system("cls");
     cout<<"Masukan Nama Barang Yang Ingin Di Edit :";
     cin>>nama;
@@ -179,6 +185,7 @@ void cari_barang(){
     }
 }
 void hapus_barang(){
+    string nama;
     cout<<"Masukan Nama Barang Yang Ingin Di Hapus : ";
     cin>>nama;
     ubahkapital(nama);
@@ -267,11 +274,6 @@ void sorting_data(jualan* barang){
             if(ganti == true){
                 swap(barang[j], barang[j+1]);
             }
-    
-    
-    // // Bubble sort berdasarkan harga
-    
-            
         }
     }
 
@@ -338,6 +340,7 @@ void buatakun(){
 }
 void login(){
     system("cls");
+    string verifikasiusername,verifikasipassword,verifikasiperan;
     bool berhasil = false;
     int kesempatan = 3;
     for(int i = 3; i >= kesempatan ;i--){
@@ -478,6 +481,7 @@ data.close();
 
 void menu_beli(){
     char belilagi;
+    int pilihbeli;
     do{
         system("cls");
         cout<<endl;
@@ -520,6 +524,7 @@ void menu_beli(){
 
 void beli_langsung(){
     do{
+    
         system("cls");
         tampilkan_barang(barang, index);
         cout<<endl;
